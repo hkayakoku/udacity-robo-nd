@@ -38,7 +38,7 @@ void process_image_callback(const sensor_msgs::Image img)
   int forwardCount = 0;
 
   // No need to process whole image bacause ball will be in floor.
-  // So i skip image's top area. Only 20 pixel slice will be process
+  // So i skip image's top area. Only 6 pixel slice will be process
 
   int top  = img.height / 2 - 3;
   int bottom = img.height / 2 + 3;
@@ -60,10 +60,11 @@ void process_image_callback(const sensor_msgs::Image img)
           // |          |                    |          |
           // |          |                    |          |
 
+          int area = img.width / 4;
 
-          if(column >= (img.width/3) * 2)
+          if(column >= area * 3)
             rightCount++;
-          else if(column > (img.width/3) && column < (img.width/3) * 2)
+          else if(column > area && column < area * 3)
             forwardCount++;
           else
             leftCount++;
@@ -82,7 +83,7 @@ void process_image_callback(const sensor_msgs::Image img)
 
   // There is an inverse proportion between white pixel count and forward velocity
   // if forward area  has only 1 pixel white, means robot will go forward with 
-  // maximum speed which is 1.0. if forward area has maximum pixel (which is denoted
+  // maximum speed which is 0.5. if forward area has maximum pixel (which is denoted
   // by maxForwardWhitePixel variable) means robot will stop in forward direction
   // this is a linear equation.
 
@@ -91,20 +92,19 @@ void process_image_callback(const sensor_msgs::Image img)
   float angularVel = 0.0;
    
   if(forwardCount > 0 && forwardCount < maxForwardWhitePixel)
-    forwardVel =(float) (maxForwardWhitePixel - forwardCount) / (float)(maxForwardWhitePixel * 2);
+    forwardVel =(float) (maxForwardWhitePixel - forwardCount) / (float)(maxForwardWhitePixel);
    
   if((forwardCount == 0) && (rightCount != 0 || leftCount != 0))
     {
       if(rightCount > leftCount)
-        angularVel = -0.1;
+        angularVel = -0.2;
       else
-        angularVel = 0.1;
+        angularVel = 0.2;
     }
 
   drive_robot(forwardVel, angularVel);
 
   // ros::Duration(3).sleep();
-
 }
 
 
